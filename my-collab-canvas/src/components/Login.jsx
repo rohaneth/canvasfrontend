@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import './login.css';
 
 const login = async (username, password) => {
   const response = await fetch('http://localhost:8080/api/auth/login', {
@@ -35,14 +37,14 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+    <div className="login-container">
+      <div className="login-form">
+        <h2>Login</h2>
         {error && (
-          <div className="text-red-500 mb-4">
+          <div className="error-message">
             {error.message}
             {error.info && (
-              <div className="mt-2 text-sm">
+              <div>
                 {error.info.map((info, index) => (
                   <p key={index}>{info}</p>
                 ))}
@@ -50,37 +52,36 @@ const Login = () => {
             )}
           </div>
         )}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-              Username
-            </label>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
             <input
               type="text"
               id="username"
+              className="form-control"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               required
             />
           </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
+              className="form-control"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               required
             />
           </div>
-          <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+          <button type="submit" className="btn-login">
             Login
           </button>
         </form>
+        <div className="register-link">
+          Don't have an account? <Link to="/register">Register here</Link>
+        </div>
       </div>
     </div>
   );
