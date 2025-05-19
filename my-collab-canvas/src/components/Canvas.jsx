@@ -138,21 +138,27 @@ const Canvas = ({ canvasId = 'default' }) => {
   };
 
   const getCanvasCoordinates = (e) => {
-    const rect = canvasRef.current.getBoundingClientRect();
-    const scaleX = canvasRef.current.width / rect.width;
-    const scaleY = canvasRef.current.height / rect.height;
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
-    };
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    // Get the actual rendered size of the canvas
+    const actualWidth = canvas.width;
+    const actualHeight = canvas.height;
+    // Calculate the scale factors
+    const scaleX = actualWidth / rect.width;
+    const scaleY = actualHeight / rect.height;
+    
+    // Calculate the position relative to the canvas
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+    
+    return { x, y };
   };
-
 
   const startShape = ({ x, y, tool = 'freehand', color: c = '#000', text = '' }, remote = false) => {
     const isEraser = tool === 'eraser';
     const shape = {
       id: uuidv4(),
-      type: 'freehand',
+      type: tool === 'eraser' ? 'freehand' : tool,
       color: isEraser ? canvasBackground : c,
       strokeWidth,
       x,
@@ -160,7 +166,7 @@ const Canvas = ({ canvasId = 'default' }) => {
       width: 0,
       height: 0,
       radius: 0,
-      points: [{ x, y }],
+      points: tool === 'freehand' || tool === 'eraser' ? [{ x, y }] : [],
       text,
       fontSize: 16,
       fontFamily: 'Arial',
@@ -180,8 +186,15 @@ const Canvas = ({ canvasId = 'default' }) => {
         const dx = x - updated.x;
         const dy = y - updated.y;
         updated.radius = Math.hypot(dx, dy);
-      } else {
-        updated.points = [...updated.points, { x, y }];
+      } else if (updated.type === 'freehand') {
+        // Only add point if it's significantly different from the last point
+        const lastPoint = updated.points[updated.points.length - 1];
+        const distance = lastPoint ? 
+          Math.hypot(x - lastPoint.x, y - lastPoint.y) : 0;
+        
+        if (distance > 1) { // Only add point if moved more than 1 pixel
+          updated.points = [...updated.points, { x, y }];
+        }
       }
       if (!remote) sendEvent({ eventType: 'mousemove', x, y });
       return updated;
@@ -240,15 +253,21 @@ const Canvas = ({ canvasId = 'default' }) => {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Fill with background color
     ctx.fillStyle = canvasBackground;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Draw all shapes
     [...shapes, currentShape].forEach((shape) => {
       if (!shape) return;
+      
       ctx.strokeStyle = shape.color;
       ctx.fillStyle = shape.color;
       ctx.lineWidth = shape.strokeWidth;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
 
       if (shape.type === 'rectangle') {
         ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
@@ -256,12 +275,12 @@ const Canvas = ({ canvasId = 'default' }) => {
         ctx.beginPath();
         ctx.arc(shape.x, shape.y, shape.radius, 0, Math.PI * 2);
         ctx.stroke();
-      } else if (shape.type === 'freehand') {
-        if (shape.points.length < 2) return;
+      } else if (shape.type === 'freehand' && shape.points.length > 1) {
         ctx.beginPath();
         ctx.moveTo(shape.points[0].x, shape.points[0].y);
         for (let i = 1; i < shape.points.length; i++) {
-          ctx.lineTo(shape.points[i].x, shape.points[i].y);
+          const point = shape.points[i];
+          ctx.lineTo(point.x, point.y);
         }
         ctx.stroke();
       }

@@ -25,14 +25,24 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const [usernameError, setUsernameError] = useState(null);
+  const [passwordError, setPasswordError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setUsernameError(null);
+    setPasswordError(null);
     try {
       await login(username, password);
     } catch (err) {
-      setError(err);
+      if (err.info) {
+        const { username: usernameInfo, password: passwordInfo } = err.info;
+        setUsernameError(usernameInfo);
+        setPasswordError(passwordInfo);
+      } else {
+        setError(err);
+      }
     }
   };
 
@@ -42,17 +52,10 @@ const Login = () => {
         <h2>Login</h2>
         {error && (
           <div className="error-message">
-            {error.message}
-            {error.info && (
-              <div>
-                {error.info.map((info, index) => (
-                  <p key={index}>{info}</p>
-                ))}
-              </div>
-            )}
+            {"Username or password is incorrect"}
           </div>
         )}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit= {handleSubmit}>
           <div className="form-group">
             <label htmlFor="username">Username</label>
             <input
@@ -63,6 +66,11 @@ const Login = () => {
               onChange={(e) => setUsername(e.target.value)}
               required
             />
+            {usernameError && (
+              <div className="error-message">
+                {usernameError}
+              </div>
+            )}
           </div>
           <div className="form-group">
             <label htmlFor="password">Password</label>
@@ -74,10 +82,17 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            {passwordError && (
+              <div className="error-message">
+                {passwordError}
+              </div>
+            )}
           </div>
           <button type="submit" className="btn-login">
             Login
           </button>
+          
+
         </form>
         <div className="register-link">
           Don't have an account? <Link to="/register">Register here</Link>

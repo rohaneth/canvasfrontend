@@ -36,7 +36,7 @@ const Register = () => {
     <div className="register-container">
       <div className="register-form">
         <h2>Register</h2>
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="error-message">Username Already exists</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="username">Username</label>
