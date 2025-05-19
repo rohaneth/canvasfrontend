@@ -4,7 +4,7 @@ import SockJS from 'sockjs-client';
 
 
 
-const STOMP_ENDPOINT = 'http://localhost:8080/ws';
+const STOMP_ENDPOINT = 'https://backendcanvas.onrender.com/ws';
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);
@@ -15,7 +15,7 @@ const Chat = () => {
   const fetchCurrentUser = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch('http://localhost:8080/api/auth/current-user', {
+      const response = await fetch('https://backendcanvas.onrender.com/api/auth/current-user', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

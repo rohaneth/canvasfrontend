@@ -31,7 +31,7 @@ const Canvas = ({ canvasId = 'default' }) => {
   const fetchCurrentUser = async () => {
     const token = localStorage.getItem('token');
     try {
-      const resp = await fetch('http://localhost:8080/api/auth/current-user', {
+      const resp = await fetch('https://backendcanvas.onrender.com/api/auth/current-user', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -77,7 +77,7 @@ const Canvas = ({ canvasId = 'default' }) => {
       linkRef.current = url.toString();
     }
 
-    const socket = new SockJS('http://localhost:8080/ws');
+    const socket = new SockJS('https://backendcanvas.onrender.com/ws');
     clientRef.current = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import './login.css';
 
 const login = async (username, password) => {
-  const response = await fetch('http://localhost:8080/api/auth/login', {
+  const response = await fetch('https://backendcanvas.onrender.com/api/auth/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
